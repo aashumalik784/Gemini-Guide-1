@@ -17,15 +17,18 @@ import type {
 } from "@tanstack/react-query";
 
 import type {
+  AutoTitleResponse,
   CreateGeminiConversationBody,
   GeminiConversation,
   GeminiConversationWithMessages,
   GeminiError,
   GeminiMessage,
+  GeminiModel,
   GenerateGeminiImageBody,
   GenerateGeminiImageResponse,
   HealthStatus,
   SendGeminiMessageBody,
+  UpdateGeminiConversationBody,
 } from "./api.schemas";
 
 import { customFetch } from "../custom-fetch";
@@ -368,6 +371,94 @@ export function useGetGeminiConversation<
 }
 
 /**
+ * @summary Update conversation title
+ */
+export const getUpdateGeminiConversationUrl = (id: number) => {
+  return `/api/gemini/conversations/${id}`;
+};
+
+export const updateGeminiConversation = async (
+  id: number,
+  updateGeminiConversationBody: UpdateGeminiConversationBody,
+  options?: RequestInit,
+): Promise<GeminiConversation> => {
+  return customFetch<GeminiConversation>(getUpdateGeminiConversationUrl(id), {
+    ...options,
+    method: "PATCH",
+    headers: { "Content-Type": "application/json", ...options?.headers },
+    body: JSON.stringify(updateGeminiConversationBody),
+  });
+};
+
+export const getUpdateGeminiConversationMutationOptions = <
+  TError = ErrorType<GeminiError>,
+  TContext = unknown,
+>(options?: {
+  mutation?: UseMutationOptions<
+    Awaited<ReturnType<typeof updateGeminiConversation>>,
+    TError,
+    { id: number; data: BodyType<UpdateGeminiConversationBody> },
+    TContext
+  >;
+  request?: SecondParameter<typeof customFetch>;
+}): UseMutationOptions<
+  Awaited<ReturnType<typeof updateGeminiConversation>>,
+  TError,
+  { id: number; data: BodyType<UpdateGeminiConversationBody> },
+  TContext
+> => {
+  const mutationKey = ["updateGeminiConversation"];
+  const { mutation: mutationOptions, request: requestOptions } = options
+    ? options.mutation &&
+      "mutationKey" in options.mutation &&
+      options.mutation.mutationKey
+      ? options
+      : { ...options, mutation: { ...options.mutation, mutationKey } }
+    : { mutation: { mutationKey }, request: undefined };
+
+  const mutationFn: MutationFunction<
+    Awaited<ReturnType<typeof updateGeminiConversation>>,
+    { id: number; data: BodyType<UpdateGeminiConversationBody> }
+  > = (props) => {
+    const { id, data } = props ?? {};
+
+    return updateGeminiConversation(id, data, requestOptions);
+  };
+
+  return { mutationFn, ...mutationOptions };
+};
+
+export type UpdateGeminiConversationMutationResult = NonNullable<
+  Awaited<ReturnType<typeof updateGeminiConversation>>
+>;
+export type UpdateGeminiConversationMutationBody =
+  BodyType<UpdateGeminiConversationBody>;
+export type UpdateGeminiConversationMutationError = ErrorType<GeminiError>;
+
+/**
+ * @summary Update conversation title
+ */
+export const useUpdateGeminiConversation = <
+  TError = ErrorType<GeminiError>,
+  TContext = unknown,
+>(options?: {
+  mutation?: UseMutationOptions<
+    Awaited<ReturnType<typeof updateGeminiConversation>>,
+    TError,
+    { id: number; data: BodyType<UpdateGeminiConversationBody> },
+    TContext
+  >;
+  request?: SecondParameter<typeof customFetch>;
+}): UseMutationResult<
+  Awaited<ReturnType<typeof updateGeminiConversation>>,
+  TError,
+  { id: number; data: BodyType<UpdateGeminiConversationBody> },
+  TContext
+> => {
+  return useMutation(getUpdateGeminiConversationMutationOptions(options));
+};
+
+/**
  * @summary Delete a conversation
  */
 export const getDeleteGeminiConversationUrl = (id: number) => {
@@ -626,6 +717,90 @@ export const useSendGeminiMessage = <
 };
 
 /**
+ * @summary Auto-generate a title for the conversation using AI
+ */
+export const getAutoTitleGeminiConversationUrl = (id: number) => {
+  return `/api/gemini/conversations/${id}/auto-title`;
+};
+
+export const autoTitleGeminiConversation = async (
+  id: number,
+  options?: RequestInit,
+): Promise<AutoTitleResponse> => {
+  return customFetch<AutoTitleResponse>(getAutoTitleGeminiConversationUrl(id), {
+    ...options,
+    method: "POST",
+  });
+};
+
+export const getAutoTitleGeminiConversationMutationOptions = <
+  TError = ErrorType<GeminiError>,
+  TContext = unknown,
+>(options?: {
+  mutation?: UseMutationOptions<
+    Awaited<ReturnType<typeof autoTitleGeminiConversation>>,
+    TError,
+    { id: number },
+    TContext
+  >;
+  request?: SecondParameter<typeof customFetch>;
+}): UseMutationOptions<
+  Awaited<ReturnType<typeof autoTitleGeminiConversation>>,
+  TError,
+  { id: number },
+  TContext
+> => {
+  const mutationKey = ["autoTitleGeminiConversation"];
+  const { mutation: mutationOptions, request: requestOptions } = options
+    ? options.mutation &&
+      "mutationKey" in options.mutation &&
+      options.mutation.mutationKey
+      ? options
+      : { ...options, mutation: { ...options.mutation, mutationKey } }
+    : { mutation: { mutationKey }, request: undefined };
+
+  const mutationFn: MutationFunction<
+    Awaited<ReturnType<typeof autoTitleGeminiConversation>>,
+    { id: number }
+  > = (props) => {
+    const { id } = props ?? {};
+
+    return autoTitleGeminiConversation(id, requestOptions);
+  };
+
+  return { mutationFn, ...mutationOptions };
+};
+
+export type AutoTitleGeminiConversationMutationResult = NonNullable<
+  Awaited<ReturnType<typeof autoTitleGeminiConversation>>
+>;
+
+export type AutoTitleGeminiConversationMutationError = ErrorType<GeminiError>;
+
+/**
+ * @summary Auto-generate a title for the conversation using AI
+ */
+export const useAutoTitleGeminiConversation = <
+  TError = ErrorType<GeminiError>,
+  TContext = unknown,
+>(options?: {
+  mutation?: UseMutationOptions<
+    Awaited<ReturnType<typeof autoTitleGeminiConversation>>,
+    TError,
+    { id: number },
+    TContext
+  >;
+  request?: SecondParameter<typeof customFetch>;
+}): UseMutationResult<
+  Awaited<ReturnType<typeof autoTitleGeminiConversation>>,
+  TError,
+  { id: number },
+  TContext
+> => {
+  return useMutation(getAutoTitleGeminiConversationMutationOptions(options));
+};
+
+/**
  * @summary Generate an image from a text prompt
  */
 export const getGenerateGeminiImageUrl = () => {
@@ -710,3 +885,78 @@ export const useGenerateGeminiImage = <
 > => {
   return useMutation(getGenerateGeminiImageMutationOptions(options));
 };
+
+/**
+ * @summary List available AI models
+ */
+export const getListGeminiModelsUrl = () => {
+  return `/api/gemini/models`;
+};
+
+export const listGeminiModels = async (
+  options?: RequestInit,
+): Promise<GeminiModel[]> => {
+  return customFetch<GeminiModel[]>(getListGeminiModelsUrl(), {
+    ...options,
+    method: "GET",
+  });
+};
+
+export const getListGeminiModelsQueryKey = () => {
+  return [`/api/gemini/models`] as const;
+};
+
+export const getListGeminiModelsQueryOptions = <
+  TData = Awaited<ReturnType<typeof listGeminiModels>>,
+  TError = ErrorType<unknown>,
+>(options?: {
+  query?: UseQueryOptions<
+    Awaited<ReturnType<typeof listGeminiModels>>,
+    TError,
+    TData
+  >;
+  request?: SecondParameter<typeof customFetch>;
+}) => {
+  const { query: queryOptions, request: requestOptions } = options ?? {};
+
+  const queryKey = queryOptions?.queryKey ?? getListGeminiModelsQueryKey();
+
+  const queryFn: QueryFunction<
+    Awaited<ReturnType<typeof listGeminiModels>>
+  > = ({ signal }) => listGeminiModels({ signal, ...requestOptions });
+
+  return { queryKey, queryFn, ...queryOptions } as UseQueryOptions<
+    Awaited<ReturnType<typeof listGeminiModels>>,
+    TError,
+    TData
+  > & { queryKey: QueryKey };
+};
+
+export type ListGeminiModelsQueryResult = NonNullable<
+  Awaited<ReturnType<typeof listGeminiModels>>
+>;
+export type ListGeminiModelsQueryError = ErrorType<unknown>;
+
+/**
+ * @summary List available AI models
+ */
+
+export function useListGeminiModels<
+  TData = Awaited<ReturnType<typeof listGeminiModels>>,
+  TError = ErrorType<unknown>,
+>(options?: {
+  query?: UseQueryOptions<
+    Awaited<ReturnType<typeof listGeminiModels>>,
+    TError,
+    TData
+  >;
+  request?: SecondParameter<typeof customFetch>;
+}): UseQueryResult<TData, TError> & { queryKey: QueryKey } {
+  const queryOptions = getListGeminiModelsQueryOptions(options);
+
+  const query = useQuery(queryOptions) as UseQueryResult<TData, TError> & {
+    queryKey: QueryKey;
+  };
+
+  return { ...query, queryKey: queryOptions.queryKey };
+}

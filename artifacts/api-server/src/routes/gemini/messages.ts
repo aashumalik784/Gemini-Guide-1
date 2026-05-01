@@ -8,6 +8,15 @@ import {
   SendGeminiMessageBody,
 } from "@workspace/api-zod";
 
+const SUPPORTED_MODELS = [
+  "gemini-3.1-pro-preview",
+  "gemini-3-flash-preview",
+  "gemini-2.5-pro",
+  "gemini-2.5-flash",
+];
+
+const DEFAULT_MODEL = "gemini-3-flash-preview";
+
 const router = Router();
 
 router.get("/conversations/:id/messages", async (req, res) => {
@@ -39,7 +48,18 @@ router.post("/conversations/:id/messages", async (req, res) => {
   }
 
   const conversationId = paramsParsed.data.id;
-  const userContent = bodyParsed.data.content;
+  const {
+    content: userContent,
+    model: requestedModel,
+    systemPrompt,
+    imageData,
+    imageMimeType,
+  } = bodyParsed.data;
+
+  const model =
+    requestedModel && SUPPORTED_MODELS.includes(requestedModel)
+      ? requestedModel
+      : DEFAULT_MODEL;
 
   const [conversation] = await db
     .select()
@@ -55,6 +75,8 @@ router.post("/conversations/:id/messages", async (req, res) => {
     conversationId,
     role: "user",
     content: userContent,
+    imageData: imageData ?? null,
+    imageMimeType: imageMimeType ?? null,
   });
 
   const existingMessages = await db
@@ -70,13 +92,32 @@ router.post("/conversations/:id/messages", async (req, res) => {
   let fullResponse = "";
 
   try {
-    const stream = await ai.models.generateContentStream({
-      model: "gemini-3-flash-preview",
-      contents: existingMessages.map((m) => ({
+    const contents = existingMessages.map((m) => {
+      const parts: Array<{ text?: string; inlineData?: { mimeType: string; data: string } }> = [];
+
+      if (m.imageData && m.imageMimeType) {
+        parts.push({
+          inlineData: { mimeType: m.imageMimeType, data: m.imageData },
+        });
+      }
+
+      parts.push({ text: m.content });
+
+      return {
         role: m.role === "assistant" ? "model" : "user",
-        parts: [{ text: m.content }],
-      })),
-      config: { maxOutputTokens: 8192 },
+        parts,
+      };
+    });
+
+    const config: Record<string, unknown> = { maxOutputTokens: 8192 };
+    if (systemPrompt) {
+      config.systemInstruction = systemPrompt;
+    }
+
+    const stream = await ai.models.generateContentStream({
+      model,
+      contents,
+      config,
     });
 
     for await (const chunk of stream) {

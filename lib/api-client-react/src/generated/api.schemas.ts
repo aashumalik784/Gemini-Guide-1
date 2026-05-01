@@ -20,6 +20,8 @@ export interface GeminiMessage {
   conversationId: number;
   role: string;
   content: string;
+  imageData?: string | null;
+  imageMimeType?: string | null;
   createdAt: string;
 }
 
@@ -27,8 +29,16 @@ export interface CreateGeminiConversationBody {
   title: string;
 }
 
+export interface UpdateGeminiConversationBody {
+  title: string;
+}
+
 export interface SendGeminiMessageBody {
   content: string;
+  model?: string | null;
+  systemPrompt?: string | null;
+  imageData?: string | null;
+  imageMimeType?: string | null;
 }
 
 export interface GeminiConversationWithMessages {
@@ -38,6 +48,10 @@ export interface GeminiConversationWithMessages {
   messages: GeminiMessage[];
 }
 
+export interface AutoTitleResponse {
+  title: string;
+}
+
 export interface GenerateGeminiImageBody {
   prompt: string;
 }
@@ -45,6 +59,13 @@ export interface GenerateGeminiImageBody {
 export interface GenerateGeminiImageResponse {
   b64_json: string;
   mimeType: string;
+}
+
+export interface GeminiModel {
+  id: string;
+  name: string;
+  description: string;
+  badge?: string | null;
 }
 
 export interface GeminiError {

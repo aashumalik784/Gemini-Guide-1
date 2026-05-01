@@ -81,6 +81,35 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/GeminiError"
+    patch:
+      operationId: updateGeminiConversation
+      tags: [gemini]
+      summary: Update conversation title
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/UpdateGeminiConversationBody"
+      responses:
+        "200":
+          description: Updated conversation
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/GeminiConversation"
+        "404":
+          description: Not found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/GeminiError"
     delete:
       operationId: deleteGeminiConversation
       tags: [gemini]
@@ -141,6 +170,30 @@ paths:
           description: SSE stream of assistant response chunks
           content:
             text/event-stream: {}
+  /gemini/conversations/{id}/auto-title:
+    post:
+      operationId: autoTitleGeminiConversation
+      tags: [gemini]
+      summary: Auto-generate a title for the conversation using AI
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: Generated title
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/AutoTitleResponse"
+        "404":
+          description: Not found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/GeminiError"
   /gemini/generate-image:
     post:
       operationId: generateGeminiImage
@@ -159,6 +212,20 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/GenerateGeminiImageResponse"
+  /gemini/models:
+    get:
+      operationId: listGeminiModels
+      tags: [gemini]
+      summary: List available AI models
+      responses:
+        "200":
+          description: List of models
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/GeminiModel"
 components:
   schemas:
     HealthStatus:
@@ -193,6 +260,12 @@ components:
           type: string
         content:
           type: string
+        imageData:
+          type: string
+          nullable: true
+        imageMimeType:
+          type: string
+          nullable: true
         createdAt:
           type: string
           format: date-time
@@ -209,11 +282,30 @@ components:
           type: string
       required:
         - title
+    UpdateGeminiConversationBody:
+      type: object
+      properties:
+        title:
+          type: string
+      required:
+        - title
     SendGeminiMessageBody:
       type: object
       properties:
         content:
           type: string
+        model:
+          type: string
+          nullable: true
+        systemPrompt:
+          type: string
+          nullable: true
+        imageData:
+          type: string
+          nullable: true
+        imageMimeType:
+          type: string
+          nullable: true
       required:
         - content
     GeminiConversationWithMessages:
@@ -235,6 +327,13 @@ components:
         - title
         - createdAt
         - messages
+    AutoTitleResponse:
+      type: object
+      properties:
+        title:
+          type: string
+      required:
+        - title
     GenerateGeminiImageBody:
       type: object
       properties:
@@ -252,6 +351,22 @@ components:
       required:
         - b64_json
         - mimeType
+    GeminiModel:
+      type: object
+      properties:
+        id:
+          type: string
+        name:
+          type: string
+        description:
+          type: string
+        badge:
+          type: string
+          nullable: true
+      required:
+        - id
+        - name
+        - description
     GeminiError:
       type: object
       properties:

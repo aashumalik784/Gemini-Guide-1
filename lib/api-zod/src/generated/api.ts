@@ -51,9 +51,28 @@ export const GetGeminiConversationResponse = zod.object({
       conversationId: zod.number(),
       role: zod.string(),
       content: zod.string(),
+      imageData: zod.string().nullish(),
+      imageMimeType: zod.string().nullish(),
       createdAt: zod.coerce.date(),
     }),
   ),
+});
+
+/**
+ * @summary Update conversation title
+ */
+export const UpdateGeminiConversationParams = zod.object({
+  id: zod.coerce.number(),
+});
+
+export const UpdateGeminiConversationBody = zod.object({
+  title: zod.string(),
+});
+
+export const UpdateGeminiConversationResponse = zod.object({
+  id: zod.number(),
+  title: zod.string(),
+  createdAt: zod.coerce.date(),
 });
 
 /**
@@ -75,6 +94,8 @@ export const ListGeminiMessagesResponseItem = zod.object({
   conversationId: zod.number(),
   role: zod.string(),
   content: zod.string(),
+  imageData: zod.string().nullish(),
+  imageMimeType: zod.string().nullish(),
   createdAt: zod.coerce.date(),
 });
 export const ListGeminiMessagesResponse = zod.array(
@@ -90,6 +111,21 @@ export const SendGeminiMessageParams = zod.object({
 
 export const SendGeminiMessageBody = zod.object({
   content: zod.string(),
+  model: zod.string().nullish(),
+  systemPrompt: zod.string().nullish(),
+  imageData: zod.string().nullish(),
+  imageMimeType: zod.string().nullish(),
+});
+
+/**
+ * @summary Auto-generate a title for the conversation using AI
+ */
+export const AutoTitleGeminiConversationParams = zod.object({
+  id: zod.coerce.number(),
+});
+
+export const AutoTitleGeminiConversationResponse = zod.object({
+  title: zod.string(),
 });
 
 /**
@@ -103,3 +139,14 @@ export const GenerateGeminiImageResponse = zod.object({
   b64_json: zod.string(),
   mimeType: zod.string(),
 });
+
+/**
+ * @summary List available AI models
+ */
+export const ListGeminiModelsResponseItem = zod.object({
+  id: zod.string(),
+  name: zod.string(),
+  description: zod.string(),
+  badge: zod.string().nullish(),
+});
+export const ListGeminiModelsResponse = zod.array(ListGeminiModelsResponseItem);

@@ -1,10 +1,12 @@
-import React from "react";
+import React, { useState, useRef, useEffect } from "react";
 import { useTheme } from "./theme-provider";
 import { Button } from "./ui/button";
-import { Moon, Sun, Menu, MessageSquare, Plus, Trash2, Image as ImageIcon } from "lucide-react";
+import { Input } from "./ui/input";
+import { Moon, Sun, Menu, MessageSquare, Plus, Trash2, Image as ImageIcon, Search, Check, X, Edit2 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Link } from "wouter";
-import { GeminiConversation } from "@workspace/api-client-react";
+import { GeminiConversation, useUpdateGeminiConversation, getListGeminiConversationsQueryKey } from "@workspace/api-client-react";
+import { useQueryClient } from "@tanstack/react-query";
 
 interface LayoutProps {
   children: React.ReactNode;
@@ -27,6 +29,42 @@ export function Layout({
 }: LayoutProps) {
   const { theme, setTheme } = useTheme();
   const [sidebarOpen, setSidebarOpen] = React.useState(true);
+  const [searchQuery, setSearchQuery] = useState("");
+  const [editingId, setEditingId] = useState<number | null>(null);
+  const [editTitle, setEditTitle] = useState("");
+  
+  const updateConversation = useUpdateGeminiConversation();
+  const queryClient = useQueryClient();
+  const editInputRef = useRef<HTMLInputElement>(null);
+
+  const filteredConversations = conversations.filter(c => 
+    c.title.toLowerCase().includes(searchQuery.toLowerCase())
+  );
+
+  const handleEditStart = (id: number, title: string, e: React.MouseEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    setEditingId(id);
+    setEditTitle(title);
+  };
+
+  useEffect(() => {
+    if (editingId && editInputRef.current) {
+      editInputRef.current.focus();
+    }
+  }, [editingId]);
+
+  const handleEditSave = async () => {
+    if (editingId && editTitle.trim()) {
+      await updateConversation.mutateAsync({ id: editingId, data: { title: editTitle.trim() } });
+      queryClient.invalidateQueries({ queryKey: getListGeminiConversationsQueryKey() });
+    }
+    setEditingId(null);
+  };
+
+  const handleEditCancel = () => {
+    setEditingId(null);
+  };
 
   return (
     <div className="flex h-screen w-full overflow-hidden bg-background text-foreground">
@@ -38,8 +76,8 @@ export function Layout({
         )}
       >
         <div className="p-4 flex items-center justify-between">
-          <span className="font-semibold text-lg gemini-gradient-text px-2">Conversations</span>
-          <Button variant="ghost" size="icon" onClick={() => setSidebarOpen(false)} className="md:hidden">
+          <span className="font-semibold text-lg gemini-gradient-text px-2 whitespace-nowrap">Conversations</span>
+          <Button variant="ghost" size="icon" onClick={() => setSidebarOpen(false)} className="md:hidden shrink-0">
             <Menu className="h-5 w-5" />
           </Button>
         </div>
@@ -60,8 +98,21 @@ export function Layout({
           </Button>
         </div>
 
+        <div className="px-3 pb-2">
+          <div className="relative">
+            <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
+            <Input
+              type="text"
+              placeholder="Search..."
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              className="pl-9 h-9 bg-background/50 border-sidebar-border/50 text-sm"
+            />
+          </div>
+        </div>
+
         <div className="flex-1 overflow-y-auto px-3 py-2 space-y-1 no-scrollbar">
-          {conversations.map((conv) => (
+          {filteredConversations.map((conv) => (
             <div 
               key={conv.id}
               className={cn(
@@ -71,21 +122,50 @@ export function Layout({
                   : "text-sidebar-foreground hover:bg-sidebar-accent/50"
               )}
             >
-              <Link href={`/chat/${conv.id}`} className="flex-1 flex items-center gap-3 truncate" onClick={() => { if(isImageMode) onToggleImageMode(); }}>
-                <MessageSquare className="h-4 w-4 shrink-0 opacity-70" />
-                <span className="truncate">{conv.title}</span>
-              </Link>
-              <Button
-                variant="ghost"
-                size="icon"
-                className="h-6 w-6 opacity-0 group-hover:opacity-100 transition-opacity text-muted-foreground hover:text-destructive"
-                onClick={(e) => {
-                  e.stopPropagation();
-                  onDeleteChat(conv.id);
-                }}
-              >
-                <Trash2 className="h-3 w-3" />
-              </Button>
+              {editingId === conv.id ? (
+                <div className="flex-1 flex items-center gap-2">
+                  <Input
+                    ref={editInputRef}
+                    value={editTitle}
+                    onChange={(e) => setEditTitle(e.target.value)}
+                    onKeyDown={(e) => {
+                      if (e.key === 'Enter') handleEditSave();
+                      if (e.key === 'Escape') handleEditCancel();
+                    }}
+                    onBlur={handleEditSave}
+                    className="h-7 text-sm px-2 bg-background"
+                  />
+                </div>
+              ) : (
+                <Link href={`/chat/${conv.id}`} className="flex-1 flex items-center gap-3 truncate" onClick={() => { if(isImageMode) onToggleImageMode(); }}>
+                  <MessageSquare className="h-4 w-4 shrink-0 opacity-70" />
+                  <span className="truncate">{conv.title}</span>
+                </Link>
+              )}
+              
+              {editingId !== conv.id && (
+                <div className="flex items-center opacity-0 group-hover:opacity-100 transition-opacity">
+                  <Button
+                    variant="ghost"
+                    size="icon"
+                    className="h-6 w-6 text-muted-foreground hover:text-foreground"
+                    onClick={(e) => handleEditStart(conv.id, conv.title, e)}
+                  >
+                    <Edit2 className="h-3 w-3" />
+                  </Button>
+                  <Button
+                    variant="ghost"
+                    size="icon"
+                    className="h-6 w-6 text-muted-foreground hover:text-destructive"
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      onDeleteChat(conv.id);
+                    }}
+                  >
+                    <Trash2 className="h-3 w-3" />
+                  </Button>
+                </div>
+              )}
             </div>
           ))}
         </div>
