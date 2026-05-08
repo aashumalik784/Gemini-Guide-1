@@ -3,12 +3,10 @@ import Groq from "groq-sdk";
 
 const router = Router();
 
-// Groq client init
 const groq = new Groq({
   apiKey: process.env.GROQ_API_KEY,
 });
 
-// POST /api/gemini/conversations/:id/messages
 router.post("/conversations/:id/messages", async (req, res) => {
   try {
     const { content } = req.body;
@@ -18,7 +16,6 @@ router.post("/conversations/:id/messages", async (req, res) => {
       return res.status(400).json({ error: "Message content is required" });
     }
 
-    // Groq ko call kar
     const chatCompletion = await groq.chat.completions.create({
       messages: [
         {
@@ -26,7 +23,7 @@ router.post("/conversations/:id/messages", async (req, res) => {
           content: content,
         },
       ],
-      model: "llama-3.1-8b-instant", // Fast model
+      model: "llama-3.1-8b-instant",
       temperature: 1,
       max_tokens: 1024,
       stream: false,
@@ -34,7 +31,6 @@ router.post("/conversations/:id/messages", async (req, res) => {
 
     const aiResponse = chatCompletion.choices[0]?.message?.content || "Sorry, kuch galat ho gaya";
 
-    // Response bhej
     res.json({
       id: Date.now().toString(),
       conversationId: conversationId,
