@@ -2,9 +2,9 @@ import React, { useState, useRef, useEffect } from "react";
 import { useTheme } from "./theme-provider";
 import { Button } from "./ui/button";
 import { Input } from "./ui/input";
-import { Moon, Sun, Menu, MessageSquare, Plus, Trash2, Image as ImageIcon, Search, Check, X, Edit2 } from "lucide-react";
+import { Moon, Sun, Menu, MessageSquare, Plus, Trash2, Image as ImageIcon, Search, Edit2 } from "lucide-react";
 import { cn } from "@/lib/utils";
-import { Link } from "wouter";
+import { Link, useLocation } from "wouter";
 import { GeminiConversation, useUpdateGeminiConversation, getListGeminiConversationsQueryKey } from "@workspace/api-client-react";
 import { useQueryClient } from "@tanstack/react-query";
 
@@ -28,6 +28,7 @@ export function Layout({
   onToggleImageMode
 }: LayoutProps) {
   const { theme, setTheme } = useTheme();
+  const [location, setLocation] = useLocation();
   const [sidebarOpen, setSidebarOpen] = React.useState(true);
   const [searchQuery, setSearchQuery] = useState("");
   const [editingId, setEditingId] = useState<number | null>(null);
@@ -88,11 +89,11 @@ export function Layout({
             New Chat
           </Button>
           <Button 
-            variant={isImageMode ? "default" : "outline"}
+            variant={location === "/image-studio" ? "default" : "outline"}
             size="icon" 
             className="rounded-full shrink-0" 
-            onClick={onToggleImageMode}
-            title="Image Generation Mode"
+            onClick={() => setLocation(location === "/image-studio" ? "/" : "/image-studio")}
+            title="Image Studio"
           >
             <ImageIcon className="h-4 w-4" />
           </Button>

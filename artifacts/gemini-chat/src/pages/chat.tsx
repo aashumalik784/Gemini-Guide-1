@@ -1,4 +1,4 @@
-import React, { useState, useRef, useEffect, useCallback } from "react";
+import React, { useState, useRef, useEffect } from "react";
 import { useParams, useLocation } from "wouter";
 import { useQueryClient } from "@tanstack/react-query";
 import { 
@@ -6,7 +6,6 @@ import {
   useCreateGeminiConversation, 
   useGetGeminiConversation,
   useDeleteGeminiConversation,
-  useGenerateGeminiImage,
   useListGeminiModels,
   useAutoTitleGeminiConversation,
   getGetGeminiConversationQueryKey,
@@ -18,7 +17,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { 
-  Send, Image as ImageIcon, Sparkles, Loader2, StopCircle, 
+  Send, Sparkles, Loader2, StopCircle, 
   Paperclip, Copy, Check, RefreshCw, Wand2, X
 } from "lucide-react";
 import { cn } from "@/lib/utils";
@@ -100,7 +99,6 @@ export default function ChatPage() {
   const conversationId = idStr ? parseInt(idStr, 10) : undefined;
   
   const queryClient = useQueryClient();
-  const [isImageMode, setIsImageMode] = useState(false);
   const [input, setInput] = useState("");
   const [isStreaming, setIsStreaming] = useState(false);
   const [streamedContent, setStreamedContent] = useState("");
@@ -116,21 +114,19 @@ export default function ChatPage() {
   const { data: models = [] } = useListGeminiModels();
   const createConversation = useCreateGeminiConversation();
   const deleteConversation = useDeleteGeminiConversation();
-  const generateImage = useGenerateGeminiImage();
   const autoTitle = useAutoTitleGeminiConversation();
   
   const { data: activeConversation } = useGetGeminiConversation(
     conversationId as number, 
     { 
       query: { 
-        enabled: !!conversationId && !isImageMode, 
+        enabled: !!conversationId, 
         queryKey: getGetGeminiConversationQueryKey(conversationId as number) 
       } 
     }
   );
 
   const [localMessages, setLocalMessages] = useState<ChatMessage[]>([]);
-  const [generatedImage, setGeneratedImage] = useState<string | null>(null);
   const [copiedMessageId, setCopiedMessageId] = useState<string | number | null>(null);
 
   // Sync server messages to local state
@@ -148,11 +144,9 @@ export default function ChatPage() {
 
   useEffect(() => {
     scrollToBottom();
-  }, [localMessages, streamedContent, generatedImage]);
+  }, [localMessages, streamedContent]);
 
   const handleNewChat = () => {
-    setIsImageMode(false);
-    setGeneratedImage(null);
     setInput("");
     setUploadImage(null);
     setLocation("/");
@@ -187,17 +181,6 @@ export default function ChatPage() {
   };
 
   const sendPrompt = async (userMessage: string, modelToUse: string = selectedModel) => {
-    if (isImageMode) {
-      setGeneratedImage(null);
-      try {
-        const res = await generateImage.mutateAsync({ data: { prompt: userMessage } });
-        setGeneratedImage(`data:${res.mimeType};base64,${res.b64_json}`);
-      } catch (error) {
-        console.error("Image generation failed:", error);
-      }
-      return;
-    }
-
     let targetId = conversationId;
     let isFirstMessage = false;
 
@@ -296,7 +279,7 @@ export default function ChatPage() {
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    if (!input.trim() || isStreaming || generateImage.isPending) return;
+    if (!input.trim() || isStreaming) return;
     const msg = input.trim();
     setInput("");
     sendPrompt(msg);
@@ -347,32 +330,21 @@ export default function ChatPage() {
       activeConversationId={conversationId} 
       onNewChat={handleNewChat}
       onDeleteChat={handleDeleteChat}
-      isImageMode={isImageMode}
-      onToggleImageMode={() => {
-        setIsImageMode(true);
-        setLocation("/");
-      }}
+      isImageMode={false}
+      onToggleImageMode={() => setLocation("/image-studio")}
     >
       <div className="flex flex-col h-full w-full max-w-4xl mx-auto">
         
         {/* Header */}
         <div className="flex-shrink-0 h-16 flex items-center justify-between px-4 border-b border-border/10 bg-background/50 backdrop-blur-sm z-10">
           <div className="flex items-center gap-2">
-            {isImageMode ? (
-              <div className="flex items-center text-primary gap-2 font-medium">
-                <Sparkles className="w-5 h-5" />
-                <span>Image Studio</span>
-              </div>
-            ) : (
-              <div className="text-muted-foreground text-sm font-medium">
-                {activeConversation?.title || "New Chat"}
-              </div>
-            )}
+            <div className="text-muted-foreground text-sm font-medium">
+              {activeConversation?.title || "New Chat"}
+            </div>
           </div>
           
           {/* Top Controls */}
-          {!isImageMode && (
-            <div className="flex items-center gap-2">
+          <div className="flex items-center gap-2">
               <DropdownMenu>
                 <DropdownMenuTrigger asChild>
                   <Button variant="outline" size="sm" className="h-8 rounded-full">
@@ -421,14 +393,13 @@ export default function ChatPage() {
                 </DropdownMenuContent>
               </DropdownMenu>
             </div>
-          )}
         </div>
 
         {/* Chat Area */}
         <ScrollArea className="flex-1 p-4 md:p-8">
           <div className="flex flex-col gap-6 max-w-3xl mx-auto pb-8">
             
-            {!isImageMode && !conversationId && localMessages.length === 0 && (
+            {!conversationId && localMessages.length === 0 && (
               <div className="flex flex-col items-center justify-center min-h-[50vh] text-center space-y-8 animate-in fade-in zoom-in duration-500">
                 <div className="space-y-4">
                   <div className="w-16 h-16 mx-auto rounded-2xl bg-gradient-to-tr from-primary to-accent flex items-center justify-center shadow-xl">
@@ -451,37 +422,7 @@ export default function ChatPage() {
               </div>
             )}
 
-            {isImageMode && !generatedImage && !generateImage.isPending && (
-              <div className="flex flex-col items-center justify-center h-[50vh] text-center space-y-4 animate-in fade-in zoom-in duration-500">
-                <div className="w-16 h-16 rounded-2xl bg-gradient-to-tr from-blue-500 to-purple-500 flex items-center justify-center shadow-xl">
-                  <ImageIcon className="w-8 h-8 text-white" />
-                </div>
-                <h1 className="text-3xl font-bold gemini-gradient-text tracking-tight">Create an Image</h1>
-                <p className="text-muted-foreground max-w-md">
-                  Describe what you want to see, and I will generate it for you.
-                </p>
-              </div>
-            )}
-
-            {isImageMode && generateImage.isPending && (
-              <div className="flex flex-col items-center justify-center h-[50vh] text-center space-y-4">
-                <Loader2 className="w-10 h-10 animate-spin text-primary" />
-                <p className="text-muted-foreground animate-pulse">Generating your masterpiece...</p>
-              </div>
-            )}
-
-            {isImageMode && generatedImage && (
-              <div className="flex flex-col items-center gap-6 animate-in fade-in slide-in-from-bottom-4 duration-500">
-                <div className="rounded-xl overflow-hidden border shadow-2xl bg-card">
-                  <img src={generatedImage} alt="Generated result" className="max-w-full h-auto max-h-[60vh] object-contain" />
-                </div>
-                <p className="text-sm text-muted-foreground bg-muted px-4 py-2 rounded-full">
-                  Image generated successfully
-                </p>
-              </div>
-            )}
-
-            {!isImageMode && localMessages.map((msg, index) => (
+            {localMessages.map((msg, index) => (
               <div 
                 key={msg.id} 
                 className={cn(
@@ -618,36 +559,33 @@ export default function ChatPage() {
 
             <div className="relative flex items-end rounded-3xl bg-card border-2 border-input focus-within:border-primary transition-colors shadow-sm overflow-visible">
               
-              {!isImageMode && (
-                <div className="p-2 shrink-0">
-                  <input 
-                    type="file" 
-                    accept="image/*" 
-                    className="hidden" 
-                    ref={fileInputRef}
-                    onChange={handleFileChange}
-                  />
-                  <Button 
-                    type="button" 
-                    variant="ghost" 
-                    size="icon" 
-                    className="rounded-full w-10 h-10 text-muted-foreground hover:text-foreground"
-                    onClick={() => fileInputRef.current?.click()}
-                    title="Attach image"
-                  >
-                    <Paperclip className="w-5 h-5" />
-                  </Button>
-                </div>
-              )}
+              <div className="p-2 shrink-0">
+                <input 
+                  type="file" 
+                  accept="image/*" 
+                  className="hidden" 
+                  ref={fileInputRef}
+                  onChange={handleFileChange}
+                />
+                <Button 
+                  type="button" 
+                  variant="ghost" 
+                  size="icon" 
+                  className="rounded-full w-10 h-10 text-muted-foreground hover:text-foreground"
+                  onClick={() => fileInputRef.current?.click()}
+                  title="Attach image"
+                >
+                  <Paperclip className="w-5 h-5" />
+                </Button>
+              </div>
               
               <Textarea 
                 value={input}
                 onChange={(e) => setInput(e.target.value)}
                 onKeyDown={handleKeyDown}
-                placeholder={isImageMode ? "Describe the image you want to generate..." : "Ask anything..."}
+                placeholder="Ask anything..."
                 className="min-h-[56px] max-h-[200px] w-full resize-none border-0 focus-visible:ring-0 rounded-none bg-transparent py-4 px-3 no-scrollbar text-[15px]"
                 rows={1}
-                disabled={generateImage.isPending}
               />
               
               <div className="p-2 shrink-0">
@@ -669,13 +607,9 @@ export default function ChatPage() {
                       "rounded-full w-10 h-10 shadow-md transition-all duration-300",
                       input.trim() || uploadImage ? "bg-primary text-primary-foreground hover:scale-105" : "bg-muted text-muted-foreground opacity-50 cursor-not-allowed"
                     )}
-                    disabled={(!input.trim() && !uploadImage) || generateImage.isPending}
+                    disabled={!input.trim() && !uploadImage}
                   >
-                    {generateImage.isPending ? (
-                      <Loader2 className="w-5 h-5 animate-spin" />
-                    ) : (
-                      <Send className="w-5 h-5 ml-0.5" />
-                    )}
+                    <Send className="w-5 h-5 ml-0.5" />
                   </Button>
                 )}
               </div>
