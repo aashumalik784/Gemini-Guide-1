@@ -6,6 +6,7 @@ import { ThemeProvider } from "@/components/theme-provider";
 import NotFound from "@/pages/not-found";
 import ChatPage from "@/pages/chat";
 import ImageStudio from "@/pages/image-studio";
+import VideoStudio from "@/pages/video-studio";
 
 const queryClient = new QueryClient();
 
@@ -15,6 +16,7 @@ function Router() {
       <Route path="/" component={ChatPage} />
       <Route path="/chat/:id" component={ChatPage} />
       <Route path="/image-studio" component={ImageStudio} />
+      <Route path="/video-studio" component={VideoStudio} />
       <Route component={NotFound} />
     </Switch>
   );

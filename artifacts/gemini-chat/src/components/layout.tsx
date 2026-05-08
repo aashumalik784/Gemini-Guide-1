@@ -2,7 +2,7 @@ import React, { useState, useRef, useEffect } from "react";
 import { useTheme } from "./theme-provider";
 import { Button } from "./ui/button";
 import { Input } from "./ui/input";
-import { Moon, Sun, Menu, MessageSquare, Plus, Trash2, Image as ImageIcon, Search, Edit2 } from "lucide-react";
+import { Moon, Sun, Menu, MessageSquare, Plus, Trash2, Image as ImageIcon, Video, Search, Edit2 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Link, useLocation } from "wouter";
 import { GeminiConversation, useUpdateGeminiConversation, getListGeminiConversationsQueryKey } from "@workspace/api-client-react";
@@ -96,6 +96,15 @@ export function Layout({
             title="Image Studio"
           >
             <ImageIcon className="h-4 w-4" />
+          </Button>
+          <Button 
+            variant={location === "/video-studio" ? "default" : "outline"}
+            size="icon" 
+            className="rounded-full shrink-0" 
+            onClick={() => setLocation(location === "/video-studio" ? "/" : "/video-studio")}
+            title="Video Studio"
+          >
+            <Video className="h-4 w-4" />
           </Button>
         </div>
 
