@@ -4,7 +4,7 @@ import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Badge } from "@/components/ui/badge";
-import { useListGeminiConversations, getListGeminiConversationsQueryKey } from "@workspace/api-client-react";
+import { useListGeminiConversations, getListGeminiConversationsQueryKey } from "@/api-client-react";
 import { useLocation } from "wouter";
 import { Loader2, Download, Sparkles, Video, RefreshCw, Play } from "lucide-react";
 import { cn } from "@/lib/utils";

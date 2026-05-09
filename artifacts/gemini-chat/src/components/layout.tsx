@@ -5,7 +5,7 @@ import { Input } from "./ui/input";
 import { Moon, Sun, Menu, MessageSquare, Plus, Trash2, Image as ImageIcon, Video, Search, Edit2 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Link, useLocation } from "wouter";
-import { GeminiConversation, useUpdateGeminiConversation, getListGeminiConversationsQueryKey } from "@workspace/api-client-react";
+import { GeminiConversation, useUpdateGeminiConversation, getListGeminiConversationsQueryKey } from "@/api-client-react";
 import { useQueryClient } from "@tanstack/react-query";
 
 interface LayoutProps {

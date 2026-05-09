@@ -7,7 +7,7 @@ import { Badge } from "@/components/ui/badge";
 import {
   useListGeminiConversations,
   useGenerateGeminiImage,
-} from "@workspace/api-client-react";
+} from "@/api-client-react";
 import { useLocation } from "wouter";
 import {
   Loader2,
@@ -24,7 +24,7 @@ import {
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useQueryClient } from "@tanstack/react-query";
-import { getListGeminiConversationsQueryKey } from "@workspace/api-client-react";
+import { getListGeminiConversationsQueryKey } from "@/api-client-react";
 
 const STYLES = [
   { id: "none", label: "None", suffix: "" },

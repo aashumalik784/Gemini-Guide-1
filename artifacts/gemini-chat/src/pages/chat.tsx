@@ -10,7 +10,7 @@ import {
   useAutoTitleGeminiConversation,
   getGetGeminiConversationQueryKey,
   getListGeminiConversationsQueryKey
-} from "@workspace/api-client-react";
+} from "@/api-client-react";
 import { Layout } from "@/components/layout";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
