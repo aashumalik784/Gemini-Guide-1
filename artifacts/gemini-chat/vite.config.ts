@@ -13,7 +13,6 @@ export default defineConfig(async () => ({
     react(),
     tailwindcss(),
     ...(isReplit
-      ? [
               root: path.resolve(import.meta.dirname, ".."),
             }),
           ),
