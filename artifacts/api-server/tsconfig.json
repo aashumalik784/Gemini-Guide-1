@@ -1,20 +1,17 @@
 {
-  "extends": "../../tsconfig.base.json",
   "compilerOptions": {
-    "outDir": "dist",
-    "rootDir": "src",
-    "types": ["node"]
+    "target": "ES2022",
+    "module": "NodeNext",
+    "moduleResolution": "NodeNext",
+    "outDir": "./dist",
+    "rootDir": "./src",
+    "strict": false,
+    "skipLibCheck": true,
+    "noImplicitAny": false,
+    "esModuleInterop": true,
+    "allowSyntheticDefaultImports": true,
+    "resolveJsonModule": true
   },
-  "include": ["src"],
-  "references": [
-    {
-      "path": "../../lib/db"
-    },
-    {
-      "path": "../../lib/api-zod"
-    },
-    {
-      "path": "../../lib/integrations-gemini-ai"
-    }
-  ]
+  "include": ["src/**/*"],
+  "exclude": ["node_modules", "dist"]
 }
