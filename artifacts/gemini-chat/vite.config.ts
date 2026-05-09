@@ -40,7 +40,7 @@ export default defineConfig(async () => ({
   },
   root: path.resolve(import.meta.dirname),
   build: {
-    outDir: "dist/public",
+    outDir: "dist",
     emptyOutDir: true,
     sourcemap: false,
     minify: false,
