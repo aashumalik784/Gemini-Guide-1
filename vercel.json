@@ -1,5 +1,5 @@
 {
-  "buildCommand": "cd artifacts/gemini-chat && pnpm install && pnpm run build",
+  "buildCommand": "cd artifacts/gemini-chat && npm install && npm run build",
   "outputDirectory": "artifacts/gemini-chat/dist",
-  "installCommand": "pnpm install"
+  "installCommand": "npm install"
 }
