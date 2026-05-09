@@ -14,13 +14,9 @@ export default defineConfig(async () => ({
     tailwindcss(),
     ...(isReplit
       ? [
-          (await import("@replit/vite-plugin-runtime-error-modal")).default(),
-          (await import("@replit/vite-plugin-cartographer")).then((m) =>
-            m.cartographer({
               root: path.resolve(import.meta.dirname, ".."),
             }),
           ),
-          (await import("@replit/vite-plugin-dev-banner")).then((m) =>
             m.devBanner(),
           ),
         ]

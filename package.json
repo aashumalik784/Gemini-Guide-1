@@ -1,14 +1,11 @@
 {
   "name": "workspace",
-  "version": "0.0.0",
-  "license": "MIT",
-  "scripts": {
-    "build": "pnpm --filter @workspace/gemini-chat build",
-    "typecheck": "tsc --build"
-  },
   "private": true,
+  "scripts": {
+    "build": "cd artifacts/gemini-chat && npm install && npm run build",
+    "start": "cd artifacts/gemini-chat && npm run preview"
+  },
   "devDependencies": {
-    "typescript": "~5.9.2",
-    "prettier": "^3.8.1"
+    "typescript": "~5.9.2"
   }
 }
