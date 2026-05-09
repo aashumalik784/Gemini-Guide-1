@@ -18,10 +18,10 @@ export default defineConfig(async () => ({
           (await import("@replit/vite-plugin-cartographer")).then((m) =>
             m.cartographer({
               root: path.resolve(import.meta.dirname, ".."),
-            })
+            }),
           ),
           (await import("@replit/vite-plugin-dev-banner")).then((m) =>
-            m.devBanner()
+            m.devBanner(),
           ),
         ]
       : []),
@@ -29,7 +29,12 @@ export default defineConfig(async () => ({
   resolve: {
     alias: {
       "@": path.resolve(import.meta.dirname, "src"),
-      "@assets": path.resolve(import.meta.dirname, "..", "..", "attached_assets"),
+      "@assets": path.resolve(
+        import.meta.dirname,
+        "..",
+        "..",
+        "attached_assets",
+      ),
     },
     dedupe: ["react", "react-dom"],
   },
@@ -42,10 +47,10 @@ export default defineConfig(async () => ({
     cssMinify: false,
     rollupOptions: {
       onwarn(warning, warn) {
-        if (warning.code === 'SOURCEMAP_ERROR') return;
+        if (warning.code === "SOURCEMAP_ERROR") return;
         warn(warning);
-      }
-    }
+      },
+    },
   },
   server: {
     port,
