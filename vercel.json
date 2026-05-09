@@ -1,6 +1,0 @@
-{
-  "buildCommand": "cd artifacts/gemini-chat && npm install && npm run build",
-  "outputDirectory": "artifacts/gemini-chat/dist",
-  "installCommand": "cd artifacts/gemini-chat && npm install",
-  "rewrites": [{ "source": "/(.*)", "destination": "/index.html" }]
-}
