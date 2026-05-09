@@ -4,18 +4,14 @@ import path from 'path'
 
 export default defineConfig({
   plugins: [react()],
-  root: path.resolve(import.meta.dirname, 'src'),
   build: {
-    outDir: '../dist',
+    outDir: 'dist',
     emptyOutDir: true,
   },
   resolve: {
     alias: {
-      '@': path.resolve(import.meta.dirname, 'src'),
-      '@lib': path.resolve(import.meta.dirname, '../../lib'),
+      '@': path.resolve(__dirname, 'src'),
+      '@lib': path.resolve(__dirname, '../../lib'),
     },
   },
-  server: {
-    port: 3000
-  }
 })
