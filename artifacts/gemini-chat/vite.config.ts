@@ -1,64 +1,21 @@
-import { defineConfig } from "vite";
-import react from "@vitejs/plugin-react";
-import tailwindcss from "@tailwindcss/vite";
-import path from "path";
+import { defineConfig } from 'vite'
+import react from '@vitejs/plugin-react'
+import path from 'path'
 
-const isReplit = process.env.REPL_ID !== undefined;
-const basePath = process.env.BASE_PATH || "/";
-const port = Number(process.env.PORT) || 5173;
-
-export default defineConfig(async () => ({
-  base: basePath,
-  plugins: [
-    react(),
-    tailwindcss(),
-    ...(isReplit
-              root: path.resolve(import.meta.dirname, ".."),
-            }),
-          ),
-            m.devBanner(),
-          ),
-        ]
-      : []),
-  ],
+export default defineConfig({
+  plugins: [react()],
+  root: path.resolve(import.meta.dirname, 'src'),
+  build: {
+    outDir: '../dist',
+    emptyOutDir: true,
+  },
   resolve: {
     alias: {
-      "@": path.resolve(import.meta.dirname, "src"),
-      "@assets": path.resolve(
-        import.meta.dirname,
-        "..",
-        "..",
-        "attached_assets",
-      ),
-    },
-    dedupe: ["react", "react-dom"],
-  },
-  root: path.resolve(import.meta.dirname),
-  build: {
-    outDir: "dist",
-    emptyOutDir: true,
-    sourcemap: false,
-    minify: false,
-    cssMinify: false,
-    rollupOptions: {
-      onwarn(warning, warn) {
-        if (warning.code === "SOURCEMAP_ERROR") return;
-        warn(warning);
-      },
+      '@': path.resolve(import.meta.dirname, 'src'),
+      '@lib': path.resolve(import.meta.dirname, '../../lib'),
     },
   },
   server: {
-    port,
-    strictPort: false,
-    host: "0.0.0.0",
-    allowedHosts: true,
-    fs: {
-      strict: true,
-    },
-  },
-  preview: {
-    port: Number(process.env.PORT) || 4173,
-    host: "0.0.0.0",
-    allowedHosts: true,
-  },
-}));
+    port: 3000
+  }
+})
