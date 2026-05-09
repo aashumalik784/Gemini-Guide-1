@@ -3,10 +3,7 @@ import react from "@vitejs/plugin-react";
 import tailwindcss from "@tailwindcss/vite";
 import path from "path";
 
-// Check if running on Replit
 const isReplit = process.env.REPL_ID !== undefined;
-
-// Only use PORT and BASE_PATH on Replit, fallback for Vercel
 const basePath = process.env.BASE_PATH || "/";
 const port = Number(process.env.PORT) || 5173;
 
@@ -15,7 +12,6 @@ export default defineConfig(async () => ({
   plugins: [
     react(),
     tailwindcss(),
-    // Replit-specific plugins - only load on Replit
     ...(isReplit
       ? [
           (await import("@replit/vite-plugin-runtime-error-modal")).default(),
@@ -39,13 +35,13 @@ export default defineConfig(async () => ({
   },
   root: path.resolve(import.meta.dirname),
   build: {
-    outDir: path.resolve(import.meta.dirname, "dist/public"),
+    outDir: "dist/public", // <-- FIXED
     emptyOutDir: true,
-    sourcemap: false, // Fix for "Error when using sourcemap"
+    sourcemap: false,
   },
   server: {
     port,
-    strictPort: false, // Vercel pe port conflict nahi hoga
+    strictPort: false,
     host: "0.0.0.0",
     allowedHosts: true,
     fs: {
