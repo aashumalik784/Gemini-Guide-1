@@ -35,9 +35,17 @@ export default defineConfig(async () => ({
   },
   root: path.resolve(import.meta.dirname),
   build: {
-    outDir: "dist/public", // <-- FIXED
+    outDir: "dist/public",
     emptyOutDir: true,
     sourcemap: false,
+    minify: false,
+    cssMinify: false,
+    rollupOptions: {
+      onwarn(warning, warn) {
+        if (warning.code === 'SOURCEMAP_ERROR') return;
+        warn(warning);
+      }
+    }
   },
   server: {
     port,
