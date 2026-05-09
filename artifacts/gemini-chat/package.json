@@ -51,7 +51,7 @@
     "class-variance-authority": "^0.7.1",
     "clsx": "^2.1.1",
     "cmdk": "^1.1.1",
-    "date-fns": "^3.6.0",
+    "date-fns": "^4.1.0",
     "embla-carousel-react": "^8.6.0",
     "framer-motion": "latest",
     "input-otp": "^1.4.2",
@@ -74,5 +74,10 @@
     "vite": "latest",
     "wouter": "^3.3.5",
     "zod": "latest"
+  },
+  "dependencies": {
+    "@base-ui/react": "^1.4.1",
+    "@fontsource-variable/geist": "^5.2.8",
+    "shadcn": "^4.7.0"
   }
 }
