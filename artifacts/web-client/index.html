@@ -1,0 +1,125 @@
+<!DOCTYPE html>
+<html lang="hi">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Aashu Bot - Aashu Malik Creations</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body { 
+      font-family: 'Segoe UI', sans-serif; 
+      background: #0f0f0f; 
+      color: white; 
+      padding: 20px;
+      min-height: 100vh;
+    }
+    .container { max-width: 700px; margin: 0 auto; }
+    h1 { 
+      text-align: center; 
+      color: #22c55e; 
+      margin-bottom: 10px;
+      font-size: 28px;
+    }
+    .subtitle { text-align: center; color: #888; margin-bottom: 30px; font-size: 14px; }
+    #chat { 
+      background: #1a1a1a; 
+      border-radius: 12px; 
+      padding: 20px; 
+      min-height: 400px; 
+      max-height: 500px;
+      overflow-y: auto;
+      margin-bottom: 15px;
+      border: 1px solid #333;
+    }
+    .msg { 
+      background: #262626; 
+      padding: 12px 16px; 
+      border-radius: 12px; 
+      margin: 10px 0; 
+      line-height: 1.5;
+      animation: fadeIn 0.3s;
+    }
+    .user { background: #1d4ed8; margin-left: 20%; }
+    .bot { background: #262626; margin-right: 20%; }
+    .input-area { display: flex; gap: 10px; }
+    input { 
+      flex: 1;
+      padding: 14px; 
+      background: #1a1a1a; 
+      border: 1px solid #333; 
+      color: white; 
+      border-radius: 10px;
+      font-size: 15px;
+    }
+    input:focus { outline: none; border-color: #22c55e; }
+    button { 
+      padding: 14px 28px; 
+      background: #22c55e; 
+      border: none; 
+      color: #000; 
+      border-radius: 10px; 
+      font-weight: bold;
+      cursor: pointer;
+      font-size: 15px;
+    }
+    button:hover { background: #16a34a; }
+    button:disabled { background: #555; cursor: not-allowed; }
+    .typing { color: #888; font-style: italic; }
+    @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+    a { color: #22c55e; text-decoration: none; }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>🤖 Aashu Bot</h1>
+    <p class="subtitle">Aashu Malik Creations ka Official AI Helper 💚</p>
+    
+    <div id="chat">
+      <div class="msg bot">Namaste bhai! 🙏 Mai Aashu Bot hun. Aashu Malik ke videos, YouTube tips, ya kuch bhi pucho. Kya help karu?</div>
+    </div>
+    
+    <div class="input-area">
+      <input id="input" placeholder="Yaha type karo bhai..." onkeypress="if(event.key==='Enter') send()" />
+      <button id="sendBtn" onclick="send()">Send</button>
+    </div>
+  </div>
+
+  <script>
+    const API = "https://gemini-guide-api.onrender.com/ask-channel";
+    const chat = document.getElementById('chat');
+    const input = document.getElementById('input');
+    const sendBtn = document.getElementById('sendBtn');
+    
+    async function send() {
+      const msg = input.value.trim();
+      if(!msg) return;
+      
+      chat.innerHTML += `<div class="msg user">${msg}</div>`;
+      input.value = "";
+      sendBtn.disabled = true;
+      
+      chat.innerHTML += `<div class="msg bot typing" id="typing">Aashu Bot likh raha hai...</div>`;
+      chat.scrollTop = chat.scrollHeight;
+      
+      try {
+        const res = await fetch(API, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ message: msg, lang: "hi" })
+        });
+        const data = await res.json();
+        
+        document.getElementById('typing').remove();
+        let reply = data.reply.replace(/(https?:\/\/[^\s]+)/g, '<a href="$1" target="_blank">$1</a>');
+        chat.innerHTML += `<div class="msg bot">🤖 ${reply}</div>`;
+      } catch(e) {
+        document.getElementById('typing').remove();
+        chat.innerHTML += `<div class="msg bot">😅 Bhai server thoda busy hai. 30 sec baad try karna.</div>`;
+      }
+      
+      sendBtn.disabled = false;
+      chat.scrollTop = chat.scrollHeight;
+    }
+  </script>
+</body>
+</html>
