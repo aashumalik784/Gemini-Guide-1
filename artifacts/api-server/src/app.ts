@@ -1,9 +1,10 @@
 import express from 'express';
 import cors from 'cors';
 import fetch from 'node-fetch';
+import 'dotenv/config';
 
 const app = express();
-app.use(cors()); // Hugging Face Space ke liye zaroori
+app.use(cors()); // Hugging Face Space se call allow karega
 app.use(express.json());
 
 const HF_TOKEN = process.env.HF_TOKEN;
